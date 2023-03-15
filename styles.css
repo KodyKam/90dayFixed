@@ -1,0 +1,22 @@
+body {
+    background-color: aliceblue;
+}
+
+h1 {
+    color: indigo;
+}
+
+.container {
+    background-color: skyblue;
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: auto;
+    align-items: center;
+    border-radius: 50px 50px 50px 50px;
+}
+
+.walmart {
+    display: flex;
+    padding-bottom: 20px;
+}
