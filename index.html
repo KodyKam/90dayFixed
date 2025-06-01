@@ -1,37 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>90-100 Day Expiry Products</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>90-100 Day Expiry Products</title>
+  <style>
+    .btn {
+      border-radius: 25%;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .container {
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-    <div><h1> What's the date 90 days from today ? </h1></div>
+  <div class="container">
+    <div><h1>What's the date 90 days from today?</h1></div>
     <div class="walmart"><strong>(For 'Out-of-Province' shipments add another 10 days.)</strong></div>
-    <button onclick="add()" class="btn" border-radius="25%">Tap Here To See The Date 90 Days From Now</button>
-    <p id="currentTime">Today's Date : </p>
-    <p id="updatedTime">90 Days Date: </p>
-</div>
- </body>
- <script>
-    // Code the show current date
-    let ct = document.getElementById("currentTime")
-    setInterval(() => {
-       let currentDate = Date.now();
-       ct.innerText = "Current Date : " + new Date(currentDate).toLocaleDateString()
-    }, 1000)
-    
-    // Code to add 90 days to current Time
-    let ut = document.getElementById("updatedTime")
-    function add() {
-       setInterval(() => {
-          let currentTime = new Date().getTime();
-          let updatedTIme = new Date(currentTime + 90 * 24 * 60 * 60 * 1000);
-          ut.innerText = "90 Days Date : " + updatedTIme.toLocaleDateString()
-       }, 1000)
+    <button onclick="add()" class="btn">Tap Here To See The Date 90 Days From Now</button>
+    <p id="currentTime">Today's Date:</p>
+    <p id="updatedTime">90 Days Date:</p>
+  </div>
+
+  <script>
+    // Show current date
+    const ct = document.getElementById("currentTime");
+    function updateCurrentTime() {
+      const now = new Date();
+      ct.innerText = "Today's Date: " + now.toLocaleDateString();
     }
- </script>
- </html>
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+
+    // Add 90 days
+    const ut = document.getElementById("updatedTime");
+    function add() {
+      const now = new Date();
+      const futureDate = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+      ut.innerText = "90 Days Date: " + futureDate.toLocaleDateString();
+    }
+  </script>
+</body>
+</html>
