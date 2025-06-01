@@ -1,22 +1,74 @@
+/* General Body Styling */
 body {
-    background-color: aliceblue;
-}
-
-h1 {
-    color: indigo;
-}
-
-.container {
-    background-color: skyblue;
+    background-color: #e6f2ff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
     display: flex;
-    flex-direction: column;
-    width: 50%;
-    margin: auto;
+    justify-content: center;
     align-items: center;
-    border-radius: 50px 50px 50px 50px;
+    height: 100vh;
 }
 
+/* Container Styling */
+.container {
+    background: linear-gradient(135deg, #87cefa, #b0e0e6);
+    width: 90%;
+    max-width: 600px;
+    padding: 30px 40px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 25px;
+    text-align: center;
+    animation: fadeIn 1s ease-in;
+}
+
+/* Heading */
+h1 {
+    color: #4b0082;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+/* Subtext */
 .walmart {
-    display: flex;
-    padding-bottom: 20px;
+    color: #2f4f4f;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Button Styling */
+.btn {
+    background-color: #4b0082;
+    color: white;
+    padding: 12px 25px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+    background-color: #5d3fd3;
+    transform: scale(1.05);
+}
+
+/* Date Paragraphs */
+#currentTime,
+#updatedTime {
+    font-size: 1.1rem;
+    color: #333;
+    margin-top: 15px;
+}
+
+/* Subtle Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
