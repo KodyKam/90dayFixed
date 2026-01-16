@@ -154,5 +154,89 @@ function copyResultToClipboard() {
         });
 }
 
+// NEW: Feature Suggestion Functionality
+const suggestionInput = document.getElementById('suggestionInput');
+const submitSuggestionBtn = document.getElementById('submitSuggestion');
+
+function initSuggestionBox() {
+    submitSuggestionBtn.addEventListener('click', handleSuggestionSubmit);
+    
+    // Allow Enter key to submit (with Ctrl/Cmd)
+    suggestionInput.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            handleSuggestionSubmit();
+        }
+    });
+}
+
+function handleSuggestionSubmit() {
+    const suggestion = suggestionInput.value.trim();
+    
+    if (!suggestion) {
+        showSuggestionStatus('Please enter a suggestion!', false);
+        return;
+    }
+    
+    if (suggestion.length < 10) {
+        showSuggestionStatus('Please provide more details', false);
+        return;
+    }
+    
+    // In a real app, you would send this to a backend
+    // For now, we'll just show a success message and clear the input
+    console.log('Suggestion submitted:', suggestion);
+    
+    // Show success message
+    showSuggestionStatus('Thank you! Your suggestion has been recorded.', true);
+    
+    // Clear the input
+    suggestionInput.value = '';
+    
+    // Reset status after 5 seconds
+    setTimeout(() => {
+        document.querySelector('.suggestion-note').style.opacity = '1';
+        submitSuggestionBtn.textContent = '<i class="fas fa-paper-plane"></i> Submit Suggestion';
+        submitSuggestionBtn.disabled = false;
+    }, 5000);
+}
+
+function showSuggestionStatus(message, isSuccess) {
+    const suggestionNote = document.querySelector('.suggestion-note');
+    
+    // Update button to show loading/confirmed state
+    if (isSuccess) {
+        submitSuggestionBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
+        submitSuggestionBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+        suggestionNote.textContent = message;
+        suggestionNote.style.color = '#27ae60';
+    } else {
+        suggestionNote.textContent = message;
+        suggestionNote.style.color = '#e74c3c';
+    }
+    
+    suggestionNote.style.transition = 'all 0.3s ease';
+    suggestionNote.style.opacity = '1';
+    
+    // Disable button temporarily
+    submitSuggestionBtn.disabled = true;
+}
+
+// Update the init function to include suggestion box
+function init() {
+    updateCurrentDateTime();
+    setInterval(updateCurrentDateTime, 1000);
+    
+    // Event Listeners
+    localBtn.addEventListener('click', () => calculateDate('LOCAL'));
+    provinceBtn.addEventListener('click', () => calculateDate('PROVINCE'));
+    copyBtn.addEventListener('click', copyResultToClipboard);
+    
+    // NEW: Initialize suggestion box
+    initSuggestionBox();
+    
+    // Initialize with no selection
+    resetResultDisplay();
+}
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', init);
