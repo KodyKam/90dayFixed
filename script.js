@@ -169,6 +169,7 @@ function initSuggestionBox() {
     });
 }
 
+// Replace the handleSuggestionSubmit function with this:
 function handleSuggestionSubmit() {
     const suggestion = suggestionInput.value.trim();
     
@@ -182,22 +183,19 @@ function handleSuggestionSubmit() {
         return;
     }
     
-    // In a real app, you would send this to a backend
-    // For now, we'll just show a success message and clear the input
-    console.log('Suggestion submitted:', suggestion);
+    // Send email using mailto link
+    const subject = encodeURIComponent('New Feature Suggestion - Expiry Calculator');
+    const body = encodeURIComponent(`Suggestion: ${suggestion}\n\nTime: ${new Date().toLocaleString()}\nPage: ${window.location.href}`);
+    
+    window.location.href = `mailto:YOUR_EMAIL@gmail.com?subject=${subject}&body=${body}`;
     
     // Show success message
-    showSuggestionStatus('Thank you! Your suggestion has been recorded.', true);
+    showSuggestionStatus('Thank you! Opening email client...', true);
     
     // Clear the input
-    suggestionInput.value = '';
-    
-    // Reset status after 5 seconds
     setTimeout(() => {
-        document.querySelector('.suggestion-note').style.opacity = '1';
-        submitSuggestionBtn.textContent = '<i class="fas fa-paper-plane"></i> Submit Suggestion';
-        submitSuggestionBtn.disabled = false;
-    }, 5000);
+        suggestionInput.value = '';
+    }, 1000);
 }
 
 function showSuggestionStatus(message, isSuccess) {
