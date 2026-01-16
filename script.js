@@ -169,7 +169,6 @@ function initSuggestionBox() {
     });
 }
 
-// Replace the handleSuggestionSubmit function with this:
 function handleSuggestionSubmit() {
     const suggestion = suggestionInput.value.trim();
     
@@ -183,21 +182,29 @@ function handleSuggestionSubmit() {
         return;
     }
     
-    // Send email using mailto link
-    const subject = encodeURIComponent('New Feature Suggestion - Expiry Calculator');
-    const body = encodeURIComponent(`Suggestion: ${suggestion}\n\nTime: ${new Date().toLocaleString()}\nPage: ${window.location.href}`);
+    // Format the message
+    const message = `🎯 *NEW FEATURE SUGGESTION*\n\n${suggestion}\n\n📅 ${new Date().toLocaleString()}\n🌐 ${window.location.href}`;
     
-    window.location.href = `mailto:kamara.alleyne@gmail.com?subject=${subject}&body=${body}`;
+    // Encode for WhatsApp URL
+    const encodedMessage = encodeURIComponent(message);
     
-    // Show success message
-    showSuggestionStatus('Thank you! Opening email client...', true);
+    // Your WhatsApp number (with country code, no + or 0)
+    const yourNumber = '6477220548'; // Replace with your actual number
     
-    // Clear the input
+    // Create WhatsApp link
+    const whatsappLink = `https://wa.me/${6477220548}?text=${encodedMessage}`;
+    
+    // Open in new tab
+    window.open(whatsappLink, '_blank');
+    
+    // Show success status
+    showSuggestionStatus('Thank you! Opening WhatsApp...', true);
+    
+    // Clear input after a delay
     setTimeout(() => {
         suggestionInput.value = '';
-    }, 1000);
+    }, 500);
 }
-
 function showSuggestionStatus(message, isSuccess) {
     const suggestionNote = document.querySelector('.suggestion-note');
     
