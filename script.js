@@ -187,7 +187,7 @@ function handleSuggestionSubmit() {
     const subject = encodeURIComponent('New Feature Suggestion - Expiry Calculator');
     const body = encodeURIComponent(`Suggestion: ${suggestion}\n\nTime: ${new Date().toLocaleString()}\nPage: ${window.location.href}`);
     
-    window.location.href = `mailto:YOUR_EMAIL@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:kamara.alleyne@gmail.com?subject=${subject}&body=${body}`;
     
     // Show success message
     showSuggestionStatus('Thank you! Opening email client...', true);
