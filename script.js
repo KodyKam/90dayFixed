@@ -10,6 +10,10 @@ const resultNoteEl = document.getElementById('resultNote');
 const copyBtn = document.getElementById('copyBtn');
 const copyStatusEl = document.getElementById('copyStatus');
 
+// NEW: Suggestion elements
+const suggestionInput = document.getElementById('suggestionInput');
+const submitSuggestionBtn = document.getElementById('submitSuggestion');
+
 // Configuration
 const CONFIG = {
     LOCAL: {
@@ -26,18 +30,140 @@ const CONFIG = {
     }
 };
 
-// Initialize
-function init() {
-    updateCurrentDateTime();
-    setInterval(updateCurrentDateTime, 1000);
+// Initialize suggestion functionality
+function initSuggestionBox() {
+    if (!submitSuggestionBtn || !suggestionInput) return;
     
-    // Event Listeners
-    localBtn.addEventListener('click', () => calculateDate('LOCAL'));
-    provinceBtn.addEventListener('click', () => calculateDate('PROVINCE'));
-    copyBtn.addEventListener('click', copyResultToClipboard);
+    submitSuggestionBtn.addEventListener('click', handleSuggestionSubmit);
     
-    // Initialize with no selection
-    resetResultDisplay();
+    // Allow Enter key to submit (with Ctrl/Cmd)
+    suggestionInput.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            handleSuggestionSubmit();
+        }
+    });
+}
+
+// Show suggestion status
+function showSuggestionStatus(message, isSuccess) {
+    const suggestionNote = document.querySelector('.suggestion-note');
+    if (!suggestionNote) return;
+    
+    suggestionNote.textContent = message;
+    suggestionNote.style.color = isSuccess ? '#27ae60' : '#e74c3c';
+    suggestionNote.style.transition = 'all 0.3s ease';
+    suggestionNote.style.opacity = '1';
+}
+
+// Handle suggestion submission
+function handleSuggestionSubmit() {
+    if (!suggestionInput || !submitSuggestionBtn) return;
+    
+    const suggestion = suggestionInput.value.trim();
+    
+    if (!suggestion) {
+        showSuggestionStatus('Please enter a suggestion!', false);
+        return;
+    }
+    
+    if (suggestion.length < 10) {
+        showSuggestionStatus('Please provide more details', false);
+        return;
+    }
+    
+    // Show loading state
+    showSuggestionStatus('Sending suggestion...', true);
+    const originalButtonText = submitSuggestionBtn.innerHTML;
+    submitSuggestionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    submitSuggestionBtn.disabled = true;
+    
+    try {
+        // Create a hidden form for FormSubmit.co
+        const form = document.createElement('form');
+        form.style.display = 'none';
+        form.method = 'POST';
+        form.action = 'https://formsubmit.co/kamara.alleyne@gmail.com';
+        
+        // Add subject field
+        const subjectField = document.createElement('input');
+        subjectField.type = 'hidden';
+        subjectField.name = '_subject';
+        subjectField.value = 'New Suggestion for Expiry Date Calculator';
+        form.appendChild(subjectField);
+        
+        // Add message field
+        const messageField = document.createElement('input');
+        messageField.type = 'hidden';
+        messageField.name = 'message';
+        messageField.value = `Suggestion: ${suggestion}\n\nPage: ${window.location.href}\nTime: ${new Date().toLocaleString()}`;
+        form.appendChild(messageField);
+        
+        // Add reply-to field (optional - user's email if you want them to be able to reply)
+        // const replyToField = document.createElement('input');
+        // replyToField.type = 'hidden';
+        // replyToField.name = '_replyto';
+        // replyToField.value = 'user@example.com'; // You could add an email input field
+        // form.appendChild(replyToField);
+        
+        // Add next field for custom thank you page (optional)
+        const nextField = document.createElement('input');
+        nextField.type = 'hidden';
+        nextField.name = '_next';
+        nextField.value = window.location.href + '?suggestion=success'; // Stay on same page
+        form.appendChild(nextField);
+        
+        // Add honeypot field (anti-spam)
+        const honeypot = document.createElement('input');
+        honeypot.type = 'text';
+        honeypot.name = '_honey';
+        honeypot.style.display = 'none';
+        form.appendChild(honeypot);
+        
+        // Disable captcha (optional)
+        const captcha = document.createElement('input');
+        captcha.type = 'hidden';
+        captcha.name = '_captcha';
+        captcha.value = 'false';
+        form.appendChild(captcha);
+        
+        // Append form to body and submit
+        document.body.appendChild(form);
+        form.submit();
+        
+        // Show success status immediately (form submission happens in background)
+        showSuggestionStatus('Thank you! Suggestion submitted successfully.', true);
+        submitSuggestionBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
+        submitSuggestionBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+        
+        // Clear input
+        suggestionInput.value = '';
+        
+        // Reset button after 3 seconds
+        setTimeout(() => {
+            submitSuggestionBtn.innerHTML = originalButtonText;
+            submitSuggestionBtn.disabled = false;
+            submitSuggestionBtn.style.background = '';
+            const suggestionNote = document.querySelector('.suggestion-note');
+            if (suggestionNote) {
+                suggestionNote.textContent = 'Have an idea to improve this tool? Share it!';
+                suggestionNote.style.color = '#666';
+            }
+        }, 3000);
+        
+        // Remove the form after submission
+        setTimeout(() => {
+            if (document.body.contains(form)) {
+                document.body.removeChild(form);
+            }
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Failed to submit suggestion:', error);
+        showSuggestionStatus('Failed to send suggestion. Please try again.', false);
+        submitSuggestionBtn.innerHTML = originalButtonText;
+        submitSuggestionBtn.disabled = false;
+        submitSuggestionBtn.style.background = '';
+    }
 }
 
 // Update current date and time
@@ -154,73 +280,7 @@ function copyResultToClipboard() {
         });
 }
 
-// NEW: Feature Suggestion Functionality
-function handleSuggestionSubmit() {
-    const suggestion = suggestionInput.value.trim();
-    
-    if (!suggestion) {
-        showSuggestionStatus('Please enter a suggestion!', false);
-        return;
-    }
-    
-    if (suggestion.length < 10) {
-        showSuggestionStatus('Please provide more details', false);
-        return;
-    }
-    
-    // Create a hidden form
-    const form = document.createElement('form');
-    form.style.display = 'none';
-    form.method = 'POST';
-    form.action = 'https://formsubmit.co/kamara.alleyne@gmail.com'; // Replace with your email
-    form.target = '_blank';
-    
-    // Add subject field
-    const subjectField = document.createElement('input');
-    subjectField.type = 'hidden';
-    subjectField.name = '_subject';
-    subjectField.value = 'New Suggestion for Expiry Date Calculator';
-    form.appendChild(subjectField);
-    
-    // Add message field
-    const messageField = document.createElement('input');
-    messageField.type = 'hidden';
-    messageField.name = 'message';
-    messageField.value = `Suggestion: ${suggestion}\n\nPage: ${window.location.href}\nTime: ${new Date().toLocaleString()}`;
-    form.appendChild(messageField);
-    
-    // Add honeypot field (optional anti-spam)
-    const honeypot = document.createElement('input');
-    honeypot.type = 'text';
-    honeypot.name = '_honey';
-    honeypot.style.display = 'none';
-    form.appendChild(honeypot);
-    
-    // Add disable captcha field (optional)
-    const captcha = document.createElement('input');
-    captcha.type = 'hidden';
-    captcha.name = '_captcha';
-    captcha.value = 'false';
-    form.appendChild(captcha);
-    
-    // Append form to body and submit
-    document.body.appendChild(form);
-    form.submit();
-    
-    // Show success status
-    showSuggestionStatus('Thank you! Suggestion submitted.', true);
-    submitSuggestionBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
-    submitSuggestionBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
-    
-    // Clear input after a delay
-    setTimeout(() => {
-        suggestionInput.value = '';
-        // Remove the form
-        document.body.removeChild(form);
-    }, 500);
-}
-
-// Update the init function to include suggestion box
+// Initialize
 function init() {
     updateCurrentDateTime();
     setInterval(updateCurrentDateTime, 1000);
@@ -230,7 +290,7 @@ function init() {
     provinceBtn.addEventListener('click', () => calculateDate('PROVINCE'));
     copyBtn.addEventListener('click', copyResultToClipboard);
     
-    // NEW: Initialize suggestion box
+    // Initialize suggestion box
     initSuggestionBox();
     
     // Initialize with no selection
