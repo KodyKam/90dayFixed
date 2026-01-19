@@ -155,20 +155,6 @@ function copyResultToClipboard() {
 }
 
 // NEW: Feature Suggestion Functionality
-const suggestionInput = document.getElementById('suggestionInput');
-const submitSuggestionBtn = document.getElementById('submitSuggestion');
-
-function initSuggestionBox() {
-    submitSuggestionBtn.addEventListener('click', handleSuggestionSubmit);
-    
-    // Allow Enter key to submit (with Ctrl/Cmd)
-    suggestionInput.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            handleSuggestionSubmit();
-        }
-    });
-}
-
 function handleSuggestionSubmit() {
     const suggestion = suggestionInput.value.trim();
     
@@ -182,48 +168,56 @@ function handleSuggestionSubmit() {
         return;
     }
     
-    // Format the message
-    const message = `🎯 *NEW FEATURE SUGGESTION*\n\n${suggestion}\n\n📅 ${new Date().toLocaleString()}\n🌐 ${window.location.href}`;
+    // Create a hidden form
+    const form = document.createElement('form');
+    form.style.display = 'none';
+    form.method = 'POST';
+    form.action = 'https://formsubmit.co/kamara.alleyne@gmail.com'; // Replace with your email
+    form.target = '_blank';
     
-    // Encode for WhatsApp URL
-    const encodedMessage = encodeURIComponent(message);
+    // Add subject field
+    const subjectField = document.createElement('input');
+    subjectField.type = 'hidden';
+    subjectField.name = '_subject';
+    subjectField.value = 'New Suggestion for Expiry Date Calculator';
+    form.appendChild(subjectField);
     
-    // Your WhatsApp number (with country code, no + or 0)
-    const yourNumber = '6477220548'; // Replace with your actual number
+    // Add message field
+    const messageField = document.createElement('input');
+    messageField.type = 'hidden';
+    messageField.name = 'message';
+    messageField.value = `Suggestion: ${suggestion}\n\nPage: ${window.location.href}\nTime: ${new Date().toLocaleString()}`;
+    form.appendChild(messageField);
     
-    // Create WhatsApp link
-    const whatsappLink = `https://wa.me/${6477220548}?text=${encodedMessage}`;
+    // Add honeypot field (optional anti-spam)
+    const honeypot = document.createElement('input');
+    honeypot.type = 'text';
+    honeypot.name = '_honey';
+    honeypot.style.display = 'none';
+    form.appendChild(honeypot);
     
-    // Open in new tab
-    window.open(whatsappLink, '_blank');
+    // Add disable captcha field (optional)
+    const captcha = document.createElement('input');
+    captcha.type = 'hidden';
+    captcha.name = '_captcha';
+    captcha.value = 'false';
+    form.appendChild(captcha);
+    
+    // Append form to body and submit
+    document.body.appendChild(form);
+    form.submit();
     
     // Show success status
-    showSuggestionStatus('Thank you! Opening WhatsApp...', true);
+    showSuggestionStatus('Thank you! Suggestion submitted.', true);
+    submitSuggestionBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
+    submitSuggestionBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
     
     // Clear input after a delay
     setTimeout(() => {
         suggestionInput.value = '';
+        // Remove the form
+        document.body.removeChild(form);
     }, 500);
-}
-function showSuggestionStatus(message, isSuccess) {
-    const suggestionNote = document.querySelector('.suggestion-note');
-    
-    // Update button to show loading/confirmed state
-    if (isSuccess) {
-        submitSuggestionBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
-        submitSuggestionBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
-        suggestionNote.textContent = message;
-        suggestionNote.style.color = '#27ae60';
-    } else {
-        suggestionNote.textContent = message;
-        suggestionNote.style.color = '#e74c3c';
-    }
-    
-    suggestionNote.style.transition = 'all 0.3s ease';
-    suggestionNote.style.opacity = '1';
-    
-    // Disable button temporarily
-    submitSuggestionBtn.disabled = true;
 }
 
 // Update the init function to include suggestion box
