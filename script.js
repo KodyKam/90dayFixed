@@ -56,7 +56,8 @@ function showSuggestionStatus(message, isSuccess) {
 }
 
 // Handle suggestion submission
-function handleSuggestionSubmit() {
+// Handle suggestion submission
+async function handleSuggestionSubmit() {
     if (!suggestionInput || !submitSuggestionBtn) return;
     
     const suggestion = suggestionInput.value.trim();
@@ -74,97 +75,247 @@ function handleSuggestionSubmit() {
     // Show loading state
     showSuggestionStatus('Sending suggestion...', true);
     const originalButtonText = submitSuggestionBtn.innerHTML;
+    const originalButtonBg = submitSuggestionBtn.style.background;
     submitSuggestionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
     submitSuggestionBtn.disabled = true;
     
     try {
-        // Create a hidden form for FormSubmit.co
-        const form = document.createElement('form');
-        form.style.display = 'none';
-        form.method = 'POST';
-        form.action = 'https://formsubmit.co/kamara.alleyne@gmail.com';
+        // Prepare form data for FormSubmit.co
+        const formData = new FormData();
+        formData.append('_subject', 'New Suggestion for Expiry Date Calculator');
+        formData.append('message', `Suggestion: ${suggestion}\n\nPage: ${window.location.href}\nTime: ${new Date().toLocaleString()}`);
+        formData.append('_honey', ''); // Honeypot field
+        formData.append('_captcha', 'false');
+        formData.append('_template', 'table'); // Optional: table or basic
         
-        // Add subject field
-        const subjectField = document.createElement('input');
-        subjectField.type = 'hidden';
-        subjectField.name = '_subject';
-        subjectField.value = 'New Suggestion for Expiry Date Calculator';
-        form.appendChild(subjectField);
-        
-        // Add message field
-        const messageField = document.createElement('input');
-        messageField.type = 'hidden';
-        messageField.name = 'message';
-        messageField.value = `Suggestion: ${suggestion}\n\nPage: ${window.location.href}\nTime: ${new Date().toLocaleString()}`;
-        form.appendChild(messageField);
-        
-        // Add reply-to field (optional - user's email if you want them to be able to reply)
-        // const replyToField = document.createElement('input');
-        // replyToField.type = 'hidden';
-        // replyToField.name = '_replyto';
-        // replyToField.value = 'user@example.com'; // You could add an email input field
-        // form.appendChild(replyToField);
-        
-        // Add next field for custom thank you page (optional)
-        const nextField = document.createElement('input');
-        nextField.type = 'hidden';
-        nextField.name = '_next';
-        nextField.value = window.location.href + '?suggestion=success'; // Stay on same page
-        form.appendChild(nextField);
-        
-        // Add honeypot field (anti-spam)
-        const honeypot = document.createElement('input');
-        honeypot.type = 'text';
-        honeypot.name = '_honey';
-        honeypot.style.display = 'none';
-        form.appendChild(honeypot);
-        
-        // Disable captcha (optional)
-        const captcha = document.createElement('input');
-        captcha.type = 'hidden';
-        captcha.name = '_captcha';
-        captcha.value = 'false';
-        form.appendChild(captcha);
-        
-        // Append form to body and submit
-        document.body.appendChild(form);
-        form.submit();
-        
-        // Show success status immediately (form submission happens in background)
-        showSuggestionStatus('Thank you! Suggestion submitted successfully.', true);
-        submitSuggestionBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
-        submitSuggestionBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
-        
-        // Clear input
-        suggestionInput.value = '';
-        
-        // Reset button after 3 seconds
-        setTimeout(() => {
-            submitSuggestionBtn.innerHTML = originalButtonText;
-            submitSuggestionBtn.disabled = false;
-            submitSuggestionBtn.style.background = '';
-            const suggestionNote = document.querySelector('.suggestion-note');
-            if (suggestionNote) {
-                suggestionNote.textContent = 'Have an idea to improve this tool? Share it!';
-                suggestionNote.style.color = '#666';
+        // Submit via fetch API (AJAX)
+        const response = await fetch('https://formsubmit.co/ajax/kamara.alleyne@gmail.com', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
             }
-        }, 3000);
+        });
         
-        // Remove the form after submission
-        setTimeout(() => {
-            if (document.body.contains(form)) {
-                document.body.removeChild(form);
-            }
-        }, 1000);
+        const result = await response.json();
+        
+        if (result.success === 'true') {
+            // Show success toast/modal
+            showSuccessToast('Suggestion submitted successfully! Thank you!');
+            
+            // Show success status
+            showSuggestionStatus('Thank you! Suggestion submitted successfully.', true);
+            submitSuggestionBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
+            submitSuggestionBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+            
+            // Clear input
+            suggestionInput.value = '';
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                submitSuggestionBtn.innerHTML = originalButtonText;
+                submitSuggestionBtn.disabled = false;
+                submitSuggestionBtn.style.background = originalButtonBg;
+                const suggestionNote = document.querySelector('.suggestion-note');
+                if (suggestionNote) {
+                    suggestionNote.textContent = 'Have an idea to improve this tool? Share it!';
+                    suggestionNote.style.color = '#666';
+                }
+            }, 3000);
+        } else {
+            throw new Error('Form submission failed');
+        }
         
     } catch (error) {
         console.error('Failed to submit suggestion:', error);
+        
+        // Show error toast
+        showErrorToast('Failed to send suggestion. Please try again.');
+        
         showSuggestionStatus('Failed to send suggestion. Please try again.', false);
         submitSuggestionBtn.innerHTML = originalButtonText;
         submitSuggestionBtn.disabled = false;
-        submitSuggestionBtn.style.background = '';
+        submitSuggestionBtn.style.background = originalButtonBg;
     }
 }
+
+// Toast notification functions
+function showSuccessToast(message) {
+    showToast(message, 'success');
+}
+
+function showErrorToast(message) {
+    showToast(message, 'error');
+}
+
+function showToast(message, type = 'info') {
+    // Remove existing toast if present
+    const existingToast = document.getElementById('custom-toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.id = 'custom-toast';
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#3498db'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        max-width: 300px;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
+        animation-fill-mode: forwards;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    // Add icon based on type
+    const icon = type === 'success' ? 'fa-check-circle' : 
+                type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    
+    toast.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 1.2em;"></i>
+        <span>${message}</span>
+    `;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(toast);
+    
+    // Remove toast after animation completes
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+        if (style.parentNode) {
+            style.remove();
+        }
+    }, 3000);
+}
+
+// Alternative: Simple Modal version (uncomment if you prefer modal over toast)
+/*
+function showSuccessModal(message) {
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    // Create modal content
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        animation: slideUp 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    `;
+    
+    modal.innerHTML = `
+        <div style="color: #27ae60; font-size: 48px; margin-bottom: 15px;">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h3 style="margin: 0 0 10px 0; color: #2c3e50;">Success!</h3>
+        <p style="color: #666; margin-bottom: 20px;">${message}</p>
+        <button id="close-modal" style="
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        ">
+            OK
+        </button>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    // Add animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Close modal on button click or overlay click
+    const closeModal = () => {
+        overlay.remove();
+        style.remove();
+    };
+    
+    document.getElementById('close-modal').addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+    });
+    
+    // Auto-close after 3 seconds
+    setTimeout(closeModal, 3000);
+}
+*/
+
+// Then replace the success call in handleSuggestionSubmit with:
+// showSuccessModal('Suggestion submitted successfully! Thank you!');
 
 // Update current date and time
 function updateCurrentDateTime() {
