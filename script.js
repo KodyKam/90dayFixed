@@ -89,7 +89,7 @@ async function handleSuggestionSubmit() {
         formData.append('_template', 'table'); // Optional: table or basic
         
         // Submit via fetch API (AJAX)
-        const response = await fetch('https://formsubmit.co/ajax/kamara.alleyne@gmail.com', {
+        const response = await fetch('https://formsubmit.co/ajax/8ef9f53b6febcb9bfb22b917a29c9a58', {
             method: 'POST',
             body: formData,
             headers: {
