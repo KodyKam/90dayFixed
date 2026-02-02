@@ -469,3 +469,26 @@ body {
     margin-top: 1rem;
     font-style: italic;
 }
+
+/* Mobile-specific reordering */
+@media (max-width: 991px) {
+    .main-content {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Create a container for all cards except suggestion */
+    .info-panel:not(.suggestion-card) {
+        order: 1;
+    }
+    
+    .calculator {
+        order: 2;
+    }
+    
+    /* Move suggestion card to bottom */
+    .suggestion-card {
+        order: 3;
+        margin-top: 1rem;
+    }
+}
