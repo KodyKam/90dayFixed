@@ -492,3 +492,49 @@ body {
         margin-top: 1rem;
     }
 }
+/* For desktop: keep original layout */
+@media (min-width: 992px) {
+    .main-content {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        grid-template-areas: "info calculator";
+    }
+    
+    .info-panel {
+        grid-area: info;
+    }
+    
+    .calculator {
+        grid-area: calculator;
+    }
+    
+    /* Keep suggestion card inside info-panel on desktop */
+    .suggestion-card {
+        order: 4; /* Make it last in the info-panel */
+    }
+}
+
+/* For mobile: reorder everything */
+@media (max-width: 991px) {
+    .main-content {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .info-panel {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Hide suggestion card from info-panel on mobile */
+    .info-panel .suggestion-card {
+        display: none;
+    }
+    
+    /* Show suggestion card at bottom of main-content on mobile */
+    .suggestion-card.mobile-version {
+        display: block;
+        order: 3; /* After calculator */
+        margin-top: 1rem;
+    }
+}
