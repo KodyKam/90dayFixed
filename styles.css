@@ -351,34 +351,7 @@ body {
     color: #888;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .container {
-        border-radius: 16px;
-    }
-    
-    .header {
-        padding: 1.5rem;
-    }
-    
-    .logo h1 {
-        font-size: 1.8rem;
-    }
-    
-    .main-content {
-        padding: 1.5rem;
-    }
-    
-    .date-display, .result-date {
-        font-size: 1.6rem;
-    }
-    
-    .order-btn {
-        padding: 1.4rem 1rem;
-    }
-}
-
-/* NEW: Suggestion Card Styles */
+/* Suggestion Card Styles */
 .suggestion-card {
     background: white;
     border-radius: 16px;
@@ -470,32 +443,36 @@ body {
     font-style: italic;
 }
 
-/* Mobile-specific reordering */
-@media (max-width: 991px) {
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        border-radius: 16px;
+    }
+    
+    .header {
+        padding: 1.5rem;
+    }
+    
+    .logo h1 {
+        font-size: 1.8rem;
+    }
+    
     .main-content {
-        display: flex;
-        flex-direction: column;
+        padding: 1.5rem;
     }
     
-    /* Create a container for all cards except suggestion */
-    .info-panel:not(.suggestion-card) {
-        order: 1;
+    .date-display, .result-date {
+        font-size: 1.6rem;
     }
     
-    .calculator {
-        order: 2;
-    }
-    
-    /* Move suggestion card to bottom */
-    .suggestion-card {
-        order: 3;
-        margin-top: 1rem;
+    .order-btn {
+        padding: 1.4rem 1rem;
     }
 }
-/* For desktop: keep original layout */
+
+/* Desktop Layout - Show desktop suggestion, hide mobile */
 @media (min-width: 992px) {
     .main-content {
-        display: grid;
         grid-template-columns: 1fr 1.5fr;
         grid-template-areas: "info calculator";
     }
@@ -508,33 +485,37 @@ body {
         grid-area: calculator;
     }
     
-    /* Keep suggestion card inside info-panel on desktop */
-    .suggestion-card {
-        order: 4; /* Make it last in the info-panel */
+    .suggestion-card.desktop-version {
+        display: block;
+    }
+    
+    .suggestion-card.mobile-version {
+        display: none;
     }
 }
 
-/* For mobile: reorder everything */
+/* Mobile Layout - Show mobile suggestion at bottom, hide desktop */
 @media (max-width: 991px) {
     .main-content {
         display: flex;
         flex-direction: column;
     }
     
-    .info-panel {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    /* Hide suggestion card from info-panel on mobile */
-    .info-panel .suggestion-card {
+    .suggestion-card.desktop-version {
         display: none;
     }
     
-    /* Show suggestion card at bottom of main-content on mobile */
     .suggestion-card.mobile-version {
         display: block;
-        order: 3; /* After calculator */
+        order: 3; /* Makes it appear after calculator */
         margin-top: 1rem;
+    }
+    
+    .info-panel {
+        order: 1;
+    }
+    
+    .calculator {
+        order: 2;
     }
 }
