@@ -10,9 +10,11 @@ const resultNoteEl = document.getElementById('resultNote');
 const copyBtn = document.getElementById('copyBtn');
 const copyStatusEl = document.getElementById('copyStatus');
 
-// NEW: Suggestion elements
+// Suggestion elements
 const suggestionInput = document.getElementById('suggestionInput');
 const submitSuggestionBtn = document.getElementById('submitSuggestion');
+const suggestionInputMobile = document.getElementById('suggestionInputMobile');
+const submitSuggestionMobileBtn = document.getElementById('submitSuggestionMobile');
 
 // Configuration
 const CONFIG = {
@@ -31,22 +33,45 @@ const CONFIG = {
 };
 
 // Initialize suggestion functionality
-function initSuggestionBox() {
-    if (!submitSuggestionBtn || !suggestionInput) return;
+function initSuggestionBoxes() {
+    // Desktop suggestion box
+    if (submitSuggestionBtn && suggestionInput) {
+        submitSuggestionBtn.addEventListener('click', () => handleSuggestionSubmit(suggestionInput));
+        
+        suggestionInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                handleSuggestionSubmit(suggestionInput);
+            }
+        });
+    }
     
-    submitSuggestionBtn.addEventListener('click', handleSuggestionSubmit);
-    
-    // Allow Enter key to submit (with Ctrl/Cmd)
-    suggestionInput.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            handleSuggestionSubmit();
-        }
-    });
+    // Mobile suggestion box
+    if (submitSuggestionMobileBtn && suggestionInputMobile) {
+        submitSuggestionMobileBtn.addEventListener('click', () => handleSuggestionSubmit(suggestionInputMobile));
+        
+        suggestionInputMobile.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                handleSuggestionSubmit(suggestionInputMobile);
+            }
+        });
+    }
 }
 
 // Show suggestion status
 function showSuggestionStatus(message, isSuccess) {
-    const suggestionNote = document.querySelector('.suggestion-note');
+    // Try to find the suggestion note near the active textarea
+    const activeTextarea = document.activeElement;
+    let suggestionNote = null;
+    
+    if (activeTextarea && activeTextarea.closest('.suggestion-card')) {
+        suggestionNote = activeTextarea.closest('.suggestion-card').querySelector('.suggestion-note');
+    }
+    
+    // Fallback to first suggestion note
+    if (!suggestionNote) {
+        suggestionNote = document.querySelector('.suggestion-note');
+    }
+    
     if (!suggestionNote) return;
     
     suggestionNote.textContent = message;
@@ -56,11 +81,10 @@ function showSuggestionStatus(message, isSuccess) {
 }
 
 // Handle suggestion submission
-// Handle suggestion submission
-async function handleSuggestionSubmit() {
-    if (!suggestionInput || !submitSuggestionBtn) return;
+async function handleSuggestionSubmit(textareaElement) {
+    if (!textareaElement) return;
     
-    const suggestion = suggestionInput.value.trim();
+    const suggestion = textareaElement.value.trim();
     
     if (!suggestion) {
         showSuggestionStatus('Please enter a suggestion!', false);
@@ -72,12 +96,15 @@ async function handleSuggestionSubmit() {
         return;
     }
     
+    // Find the submit button associated with this textarea
+    const submitBtn = textareaElement.closest('.suggestion-form').querySelector('.suggestion-btn');
+    
     // Show loading state
     showSuggestionStatus('Sending suggestion...', true);
-    const originalButtonText = submitSuggestionBtn.innerHTML;
-    const originalButtonBg = submitSuggestionBtn.style.background;
-    submitSuggestionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-    submitSuggestionBtn.disabled = true;
+    const originalButtonText = submitBtn.innerHTML;
+    const originalButtonBg = submitBtn.style.background;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    submitBtn.disabled = true;
     
     try {
         // Prepare form data for FormSubmit.co
@@ -100,26 +127,32 @@ async function handleSuggestionSubmit() {
         const result = await response.json();
         
         if (result.success === 'true') {
-            // Show success toast/modal
+            // Show success toast
             showSuccessToast('Suggestion submitted successfully! Thank you!');
             
             // Show success status
             showSuggestionStatus('Thank you! Suggestion submitted successfully.', true);
-            submitSuggestionBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
-            submitSuggestionBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+            submitBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
+            submitBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
             
             // Clear input
-            suggestionInput.value = '';
+            textareaElement.value = '';
+            
+            // Clear both textareas if they exist
+            if (suggestionInput) suggestionInput.value = '';
+            if (suggestionInputMobile) suggestionInputMobile.value = '';
             
             // Reset button after 3 seconds
             setTimeout(() => {
-                submitSuggestionBtn.innerHTML = originalButtonText;
-                submitSuggestionBtn.disabled = false;
-                submitSuggestionBtn.style.background = originalButtonBg;
-                const suggestionNote = document.querySelector('.suggestion-note');
+                submitBtn.innerHTML = originalButtonText;
+                submitBtn.disabled = false;
+                submitBtn.style.background = originalButtonBg;
+                
+                // Reset suggestion note text
+                const suggestionNote = textareaElement.closest('.suggestion-card').querySelector('.suggestion-note');
                 if (suggestionNote) {
-                    suggestionNote.textContent = 'Have an idea to improve this tool? Share it!';
-                    suggestionNote.style.color = '#666';
+                    suggestionNote.textContent = 'Your ideas help shape future improvements!';
+                    suggestionNote.style.color = '#888';
                 }
             }, 3000);
         } else {
@@ -133,9 +166,9 @@ async function handleSuggestionSubmit() {
         showErrorToast('Failed to send suggestion. Please try again.');
         
         showSuggestionStatus('Failed to send suggestion. Please try again.', false);
-        submitSuggestionBtn.innerHTML = originalButtonText;
-        submitSuggestionBtn.disabled = false;
-        submitSuggestionBtn.style.background = originalButtonBg;
+        submitBtn.innerHTML = originalButtonText;
+        submitBtn.disabled = false;
+        submitBtn.style.background = originalButtonBg;
     }
 }
 
@@ -221,101 +254,6 @@ function showToast(message, type = 'info') {
         }
     }, 3000);
 }
-
-// Alternative: Simple Modal version (uncomment if you prefer modal over toast)
-/*
-function showSuccessModal(message) {
-    // Create modal overlay
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        animation: fadeIn 0.3s ease;
-    `;
-    
-    // Create modal content
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        background: white;
-        padding: 30px;
-        border-radius: 12px;
-        text-align: center;
-        max-width: 400px;
-        width: 90%;
-        animation: slideUp 0.3s ease;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    `;
-    
-    modal.innerHTML = `
-        <div style="color: #27ae60; font-size: 48px; margin-bottom: 15px;">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <h3 style="margin: 0 0 10px 0; color: #2c3e50;">Success!</h3>
-        <p style="color: #666; margin-bottom: 20px;">${message}</p>
-        <button id="close-modal" style="
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.3s;
-        ">
-            OK
-        </button>
-    `;
-    
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-    
-    // Add animations
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Close modal on button click or overlay click
-    const closeModal = () => {
-        overlay.remove();
-        style.remove();
-    };
-    
-    document.getElementById('close-modal').addEventListener('click', closeModal);
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeModal();
-    });
-    
-    // Auto-close after 3 seconds
-    setTimeout(closeModal, 3000);
-}
-*/
-
-// Then replace the success call in handleSuggestionSubmit with:
-// showSuccessModal('Suggestion submitted successfully! Thank you!');
 
 // Update current date and time
 function updateCurrentDateTime() {
@@ -441,8 +379,8 @@ function init() {
     provinceBtn.addEventListener('click', () => calculateDate('PROVINCE'));
     copyBtn.addEventListener('click', copyResultToClipboard);
     
-    // Initialize suggestion box
-    initSuggestionBox();
+    // Initialize suggestion boxes (both desktop and mobile)
+    initSuggestionBoxes();
     
     // Initialize with no selection
     resetResultDisplay();
