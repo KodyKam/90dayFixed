@@ -36,8 +36,8 @@
                     <p><strong>100+ days remaining</strong><br>Products must expire at least 100 days from today.</p>
                 </div>
                 
-                <!-- NEW: Feature Suggestion Box -->
-                <div class="suggestion-card">
+                <!-- Suggestion Box for Desktop (hidden on mobile) -->
+                <div class="suggestion-card desktop-version">
                     <i class="fas fa-lightbulb"></i>
                     <h3>Suggestion Box</h3>
                     <p>Suggest a feature to make this tool even better!</p>
@@ -97,23 +97,24 @@
                     </div>
                 </div>
             </section>
-            <!-- Add this duplicate suggestion card just before the closing </main> tag -->
-<div class="suggestion-card mobile-version">
-    <i class="fas fa-lightbulb"></i>
-    <h3>Suggestion Box</h3>
-    <p>Suggest a feature to make this tool even better!</p>
-    <div class="suggestion-form">
-        <textarea 
-            id="suggestionInputMobile" 
-            placeholder="What feature would you like to see? (e.g., batch calculations, date picker, export options...)" 
-            rows="3"
-        ></textarea>
-        <button id="submitSuggestionMobile" class="suggestion-btn">
-            <i class="fas fa-paper-plane"></i> Submit Suggestion
-        </button>
-    </div>
-    <p class="suggestion-note">Your ideas help shape future improvements!</p>
-</div>
+            
+            <!-- Suggestion Box for Mobile (hidden on desktop) -->
+            <div class="suggestion-card mobile-version">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Suggestion Box</h3>
+                <p>Suggest a feature to make this tool even better!</p>
+                <div class="suggestion-form">
+                    <textarea 
+                        id="suggestionInputMobile" 
+                        placeholder="What feature would you like to see? (e.g., batch calculations, date picker, export options...)" 
+                        rows="3"
+                    ></textarea>
+                    <button id="submitSuggestionMobile" class="suggestion-btn">
+                        <i class="fas fa-paper-plane"></i> Submit Suggestion
+                    </button>
+                </div>
+                <p class="suggestion-note">Your ideas help shape future improvements!</p>
+            </div>
         </main>
 
         <footer class="footer">
